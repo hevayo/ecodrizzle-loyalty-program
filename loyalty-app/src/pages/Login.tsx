@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
-import Cookies from 'js-cookie';
+import { useAuth } from '../contexts/AuthContext'
+import Cookie from 'js-cookie'
 
 const LoginContainer = styled.div`
   min-height: 100vh;
@@ -77,6 +78,27 @@ const LoginButton = styled.button`
   }
 `
 
+const DemoCredentials = styled.div`
+  background: ${({ theme }) => theme.colors.surface};
+  border-radius: ${({ theme }) => theme.borderRadius.md};
+  padding: ${({ theme }) => theme.spacing.md};
+  margin-top: ${({ theme }) => theme.spacing.lg};
+`
+
+const DemoTitle = styled.h3`
+  font-size: ${({ theme }) => theme.typography.fontSize.sm};
+  font-weight: ${({ theme }) => theme.typography.fontWeight.semibold};
+  color: ${({ theme }) => theme.colors.text.primary};
+  margin-bottom: ${({ theme }) => theme.spacing.sm};
+`
+
+const DemoText = styled.p`
+  font-size: ${({ theme }) => theme.typography.fontSize.sm};
+  color: ${({ theme }) => theme.colors.text.secondary};
+  margin: 0;
+  font-family: ${({ theme }) => theme.typography.fontFamily.mono};
+`
+
 const ErrorMessage = styled.div`
   background: ${({ theme }) => theme.colors.error}15;
   color: ${({ theme }) => theme.colors.error};
@@ -124,50 +146,23 @@ const FeatureItem = styled.li`
 `
 
 const Login: React.FC = () => {
+  const { login } = useAuth()
   const navigate = useNavigate()
-  //@ts-ignore
   const [isLoading, setIsLoading] = useState(false)
-  //@ts-ignore
   const [error, setError] = useState<string | null>(null)
-  const [isHealthChecking, setIsHealthChecking] = useState(true)
-
-  // Check if user is already logged in via cookies
-  useEffect(() => {
-    const checkUserAuth = () => {
-      try {
-        const encodedUserInfo = Cookies.get('userinfo')
-        if (encodedUserInfo) {
-          // User has auth cookie, navigate to dashboard
-          setIsHealthChecking(false)
-          navigate('/dashboard')
-        } else {
-          // No cookie, show login screen
-          setIsHealthChecking(false)
-        }
-      } catch (error) {
-        // Error checking cookie, show login screen
-        console.error('Auth check failed:', error)
-        setIsHealthChecking(false)
-      }
-    }
-    checkUserAuth()
-  }, [navigate])
 
   const handleLogin = async () => {
-    window.location.href = "/auth/login";
-  }
+    setIsLoading(true)
+    setError(null)
 
-  // Show loading while checking health
-  if (isHealthChecking) {
-    return (
-      <LoginContainer>
-        <LoginCard>
-          <Logo>EcoDrizzle Rewards</Logo>
-          <Subtitle>Checking system status...</Subtitle>
-          <LoadingSpinner />
-        </LoginCard>
-      </LoginContainer>
-    )
+    try {
+      await login('demo@example.com', 'demo123')
+      navigate('/dashboard')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Login failed')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -195,6 +190,12 @@ const Login: React.FC = () => {
             {error}
           </ErrorMessage>
         )}
+
+        <DemoCredentials>
+          <DemoTitle>Demo Credentials</DemoTitle>
+          <DemoText>Email: demo@example.com</DemoText>
+          <DemoText>Password: demo123</DemoText>
+        </DemoCredentials>
       </LoginCard>
     </LoginContainer>
   )

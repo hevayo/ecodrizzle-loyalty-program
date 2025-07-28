@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
 import type { User, AuthContextType } from '../types'
 import { apiClient } from '../api/apiClient'
+import Cookies from 'js-cookie'
+import { jwtDecode } from "jwt-decode";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
@@ -15,14 +17,33 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     const initAuth = async () => {
       try {
-        const token = localStorage.getItem('authToken')
+        const token = Cookies.get('userinfo');
+        console.log('Auth token:', token);
         if (token) {
-          const userData = await apiClient.getCurrentUser()
-          setUser(userData)
+
+          const decodedToken: any = jwtDecode(token)
+          if (decodedToken) {
+            // Extract user data from JWT payload
+            const userData: User = {
+              email: decodedToken.email,
+              name: decodedToken.name,
+              pointsBalance: 0,
+              id: decodedToken.email,
+              joinDate: '',
+              preferences: {
+                notifications: true,
+                theme: 'light',
+                language: 'en'
+              },
+              tier: 'Bronze', // Default tier, can be updated later
+              avatar: ''
+            }
+            setUser(userData)
+          }
         }
       } catch (error) {
         console.error('Auth initialization failed:', error)
-        localStorage.removeItem('authToken')
+        Cookies.remove('userinfo')
       } finally {
         setIsLoading(false)
       }
