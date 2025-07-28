@@ -51,12 +51,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     initAuth()
   }, [])
 
-  const login = async (email: string, password: string) => {
+  const login = async () => {
     setIsLoading(true)
     try {
-      const response = await apiClient.login(email, password)
-      localStorage.setItem('authToken', response.token)
-      setUser(response.user)
+      window.location.href = '/auth/login' // Redirect to login page
     } catch (error) {
       console.error('Login failed:', error)
       throw error
@@ -66,7 +64,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }
 
   const logout = () => {
-    localStorage.removeItem('authToken')
+    Cookies.remove('userinfo')
+    window.location.href = '/auth/logout' // Redirect to logout page
     setUser(null)
   }
 
