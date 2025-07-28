@@ -1,9 +1,9 @@
 import express from 'express'
 import { ApiResponse, SocialMediaPost } from '../types'
 import { facebook } from '../config'
-import { getUsersPostEligibleForPoints, getPostMetadata } from '../services/facebookGraphApi'
+import { getUsersPostEligibleForPoints, getPostMetadata } from '../services/facebookApi'
 import { getUserFbID, getNewPosts } from '../services/campaignDb'
-import { getPointsForPosts } from '../services/campaignDb'
+import { getScoreForPosts } from '../services/scoreAPI'
 
 const router = express.Router()
 
@@ -71,7 +71,6 @@ router.get('/accounts', (req, res) => {
 
 // Get social media posts which are eligible for points
 router.get('/posts', async (req, res) => {
-
   const userId = await getUserFbID("priyanga8312@gmail.com");
   if (!userId) {
     return return404(res, 'No Facebook user mapping found for the given email');
@@ -86,7 +85,8 @@ router.get('/posts', async (req, res) => {
   const postMetadata = await getPostMetadata(newPosts);
 
   // Get points for each post
-  const points = await getPointsForPosts(newPosts);
+  //@ts-ignore
+  const points = await getScoreForPosts(postMetadata);
 
   // merge post metadata with points
   const postsWithPoints = posts.map((post, index) => ({
@@ -94,7 +94,6 @@ router.get('/posts', async (req, res) => {
     pointsEarned: points[index]
   }));
 
-  console.log(postsWithPoints)
   const response: ApiResponse<SocialMediaPost[]> = {
     success: true,
     message: 'Social media posts retrieved successfully',
@@ -106,27 +105,14 @@ router.get('/posts', async (req, res) => {
 
 // Claim social media points
 router.post('/claim', (req, res) => {
-  const { userId, email } = req.body
+  // get email from jwt
 
-  const unclaimedPosts = mockPosts.filter(
-    post => post.status === 'approved' && !post.pointsClaimed
-  )
+  // get post id from request body
 
-  const totalPoints = unclaimedPosts.reduce((sum, post) => sum + post.pointsEarned, 0)
+  // get point value from db 
 
-  // Mark posts as claimed
-  unclaimedPosts.forEach(post => {
-    post.pointsClaimed = true
-    post.updatedAt = new Date().toISOString()
-  })
+  // update user points in customer API
 
-  const response: ApiResponse<{ pointsEarned: number }> = {
-    success: true,
-    message: 'Points claimed successfully',
-    data: { pointsEarned: totalPoints },
-    timestamp: new Date().toISOString()
-  }
-  res.json(response)
 })
 
 function return404(res: any, message: string) {
@@ -136,6 +122,22 @@ function return404(res: any, message: string) {
     data: [],
     timestamp: new Date().toISOString()
   });
+}
+
+function jwtToJson(token: string): any | null {
+  if (!token) return null;
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3) return null;
+    const payload = parts[1];
+    // Add padding if needed
+    const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const padded = base64 + '='.repeat((4 - base64.length % 4) % 4);
+    const decoded = Buffer.from(padded, 'base64').toString('utf8');
+    return JSON.parse(decoded);
+  } catch (err) {
+    return null;
+  }
 }
 
 export default router

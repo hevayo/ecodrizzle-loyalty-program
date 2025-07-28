@@ -66,7 +66,7 @@ const getApiClient = () => {
 export const getCustomerByIdByEmail = async (email: string): Promise<string | null> => {
     try {
         const client = getApiClient();
-        const response = await client.get(`/customers`, {
+        const response = await client.get(`customers`, {
             params: { emailAddress: email }
         });
         console.log('Customer response:', response.data);
@@ -88,7 +88,7 @@ export const getCustomerByIdByEmail = async (email: string): Promise<string | nu
 export const getCustomerPoints = async (id: string): Promise<Customer | null> => {
     try {
         const client = getApiClient();
-        const response = await client.get(`/customers/${id}`);
+        const response = await client.get(`customers/${id}`);
         return response.data as Customer;
     } catch (error) {
         console.error('Error fetching customer points:', error);

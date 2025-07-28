@@ -3,14 +3,21 @@ import mysql from 'mysql2/promise'
 // Shared database pool
 let pool: mysql.Pool | null = null
 
+const hostname = process.env.CHOREO_LOYALTYDB_HOSTNAME;
+const port = process.env.CHOREO_LOYALTYDB_PORT;
+const username = process.env.CHOREO_LOYALTYDB_USERNAME;
+const password = process.env.CHOREO_LOYALTYDB_PASSWORD;
+const databasename = process.env.CHOREO_LOYALTYDB_DATABASENAME;
+
 // Initialize database connection
 const getPool = (): mysql.Pool => {
     if (!pool) {
         pool = mysql.createPool({
-            host: process.env.DB_HOST || 'localhost',
-            user: process.env.DB_USER || 'root',
-            password: process.env.DB_PASSWORD || '',
-            database: process.env.DB_NAME || 'loyalty_campaigns',
+            host: hostname,
+            port: port ? parseInt(port) : 3306,
+            user: username,
+            password: password,
+            database: databasename,
             waitForConnections: true,
             connectionLimit: 10,
             queueLimit: 0
@@ -73,8 +80,4 @@ export const closeDbConnection = async (): Promise<void> => {
         await pool.end()
         pool = null
     }
-}
-
-export const getPointsForPosts = async (posts: any[]): Promise<any[]> => {
-    return posts.map(post => post.points)
 }
