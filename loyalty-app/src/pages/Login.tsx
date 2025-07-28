@@ -2,7 +2,6 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 import { useAuth } from '../contexts/AuthContext'
-import Cookie from 'js-cookie'
 
 const LoginContainer = styled.div`
   min-height: 100vh;
