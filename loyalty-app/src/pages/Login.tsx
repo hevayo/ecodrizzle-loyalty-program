@@ -138,6 +138,7 @@ const Login: React.FC = () => {
         const encodedUserInfo = Cookies.get('userinfo')
         if (encodedUserInfo) {
           // User has auth cookie, navigate to dashboard
+          setIsHealthChecking(false)
           navigate('/dashboard')
         } else {
           // No cookie, show login screen
