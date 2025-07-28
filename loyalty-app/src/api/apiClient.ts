@@ -49,7 +49,7 @@ const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
     }
 
     const data = await response.json()
-    
+
     if (config.debug) {
       console.log(`API Response: ${config.baseUrl}${endpoint}`, data)
     }
@@ -71,7 +71,7 @@ export const apiClient = {
       method: 'POST',
       body: JSON.stringify({ email, password }),
     })
-    
+
     if (response.success) {
       localStorage.setItem('authToken', response.data.token)
       return {
@@ -94,7 +94,7 @@ export const apiClient = {
   async getPointsBalance(): Promise<number> {
     const response = await apiRequest('/points/balance')
     if (response.success) {
-      return response.data.balance
+      return response.data.currentAvailablePoints
     }
     throw new Error(response.message || 'Failed to get points balance')
   },

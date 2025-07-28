@@ -1,5 +1,7 @@
 import express from 'express'
 import { ApiResponse, Transaction } from '../types'
+import { getCustomerByIdByEmail, getCustomerPoints } from '../services/customerAPI'
+import { get } from 'axios'
 
 const router = express.Router()
 
@@ -29,9 +31,29 @@ const mockTransactions: Transaction[] = [
 ]
 
 // Get points balance
-router.get('/balance', (req, res) => {
+router.get('/balance', async (req, res) => {
   const jwtAssertion = req.header('X-JWT-Assertion');
-  res.json(jwtAssertion);
+
+  if (!jwtAssertion) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  const jwtPayload: any = jwtToJson(jwtAssertion);
+
+  //const email: string | null = "priyanga8312@gmail.com";
+  const email: string = jwtPayload.email;
+
+  if (!email) {
+    return res.status(404).json({ error: 'Customer not found' });
+  }
+
+  const customerId = await getCustomerByIdByEmail(email);
+  if (!customerId) {
+    return res.status(404).json({ error: 'Customer not found' });
+  }
+
+  const points = await getCustomerPoints(customerId);
+  res.json(points);
 })
 
 // Get transaction history
@@ -50,5 +72,23 @@ router.get('/transactions', (req, res) => {
   }
   res.json(response)
 })
+
+
+function jwtToJson(token: string): any | null {
+  if (!token) return null;
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3) return null;
+    const payload = parts[1];
+    // Add padding if needed
+    const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const padded = base64 + '='.repeat((4 - base64.length % 4) % 4);
+    const decoded = Buffer.from(padded, 'base64').toString('utf8');
+    return JSON.parse(decoded);
+  } catch (err) {
+    return null;
+  }
+}
+
 
 export default router
