@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
+import Cookies from 'js-cookie';
 
 const LoginContainer = styled.div`
   min-height: 100vh;
@@ -130,33 +131,25 @@ const Login: React.FC = () => {
   const [error, setError] = useState<string | null>(null)
   const [isHealthChecking, setIsHealthChecking] = useState(true)
 
-  // Check health API on component mount
+  // Check if user is already logged in via cookies
   useEffect(() => {
-    const checkHealth = async () => {
+    const checkUserAuth = () => {
       try {
-        const response = await fetch('/auth/userinfo', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        })
-        console.log('Health check response:', response);
-        if (response.status === 200) {
-          // API is healthy, navigate to dashboard
+        const encodedUserInfo = Cookies.get('userinfo')
+        if (encodedUserInfo) {
+          // User has auth cookie, navigate to dashboard
           navigate('/dashboard')
-          setIsHealthChecking(false);
         } else {
-          // API is not healthy, show login button
+          // No cookie, show login screen
           setIsHealthChecking(false)
         }
       } catch (error) {
-        // API is not available, show login button
-        console.error('Health check failed:', error)
+        // Error checking cookie, show login screen
+        console.error('Auth check failed:', error)
         setIsHealthChecking(false)
       }
     }
-
-    checkHealth()
+    checkUserAuth()
   }, [navigate])
 
   const handleLogin = async () => {
