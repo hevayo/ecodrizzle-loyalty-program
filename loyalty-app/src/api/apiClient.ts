@@ -3,14 +3,9 @@ import { getApiConfig } from '../config/api'
 
 const config = getApiConfig()
 
-// Helper function to get auth token
-const getAuthToken = () => {
-  return localStorage.getItem('authToken')
-}
 
 // Helper function to make API requests
 const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
-  const token = getAuthToken()
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
   }
@@ -23,13 +18,7 @@ const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
     })
   }
 
-  if (token) {
-    headers.Authorization = `Bearer ${token}`
-  }
 
-  if (config.debug) {
-    console.log(`API Request: ${config.baseUrl}${endpoint}`, { options })
-  }
 
   const controller = new AbortController()
   const timeoutId = setTimeout(() => controller.abort(), config.timeout)

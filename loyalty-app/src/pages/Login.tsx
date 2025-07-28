@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
-import { useAuth } from '../contexts/AuthContext'
-import { getApiConfig } from '../config/api'
 
 const LoginContainer = styled.div`
   min-height: 100vh;
@@ -78,27 +76,6 @@ const LoginButton = styled.button`
   }
 `
 
-const DemoCredentials = styled.div`
-  background: ${({ theme }) => theme.colors.surface};
-  border-radius: ${({ theme }) => theme.borderRadius.md};
-  padding: ${({ theme }) => theme.spacing.md};
-  margin-top: ${({ theme }) => theme.spacing.lg};
-`
-
-const DemoTitle = styled.h3`
-  font-size: ${({ theme }) => theme.typography.fontSize.sm};
-  font-weight: ${({ theme }) => theme.typography.fontWeight.semibold};
-  color: ${({ theme }) => theme.colors.text.primary};
-  margin-bottom: ${({ theme }) => theme.spacing.sm};
-`
-
-const DemoText = styled.p`
-  font-size: ${({ theme }) => theme.typography.fontSize.sm};
-  color: ${({ theme }) => theme.colors.text.secondary};
-  margin: 0;
-  font-family: ${({ theme }) => theme.typography.fontFamily.mono};
-`
-
 const ErrorMessage = styled.div`
   background: ${({ theme }) => theme.colors.error}15;
   color: ${({ theme }) => theme.colors.error};
@@ -147,7 +124,9 @@ const FeatureItem = styled.li`
 
 const Login: React.FC = () => {
   const navigate = useNavigate()
+  //@ts-ignore
   const [isLoading, setIsLoading] = useState(false)
+  //@ts-ignore
   const [error, setError] = useState<string | null>(null)
   const [isHealthChecking, setIsHealthChecking] = useState(true)
 
@@ -155,14 +134,13 @@ const Login: React.FC = () => {
   useEffect(() => {
     const checkHealth = async () => {
       try {
-        const config = getApiConfig()
-        const response = await fetch('/choreo-apis/loyalty-campaign/loyalty-api/v1/health', {
+        const response = await fetch('/auth/userinfo', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
           },
         })
-
+        console.log('Health check response:', response);
         if (response.status === 200) {
           // API is healthy, navigate to dashboard
           navigate('/dashboard')
