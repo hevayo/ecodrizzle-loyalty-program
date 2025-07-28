@@ -32,17 +32,17 @@ const mockTransactions: Transaction[] = [
 
 // Get points balance
 router.get('/balance', async (req, res) => {
-  const jwtAssertion = req.header('X-JWT-Assertion');
+  // const jwtAssertion = req.header('X-JWT-Assertion');
 
-  if (!jwtAssertion) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
+  // if (!jwtAssertion) {
+  //   return res.status(401).json({ error: 'Unauthorized' });
+  // }
 
-  const jwtPayload: any = jwtToJson(jwtAssertion);
-  console.log('JWT Payload:', jwtPayload);
+  // const jwtPayload: any = jwtToJson(jwtAssertion);
+  // console.log('JWT Payload:', jwtPayload);
 
-  //const email: string | null = "priyanga8312@gmail.com";
-  const email: string = jwtPayload.email;
+  const email: string | null = "priyanga8312@gmail.com";
+  //const email: string = jwtPayload.email;
 
   console.log('Email from JWT:', email);
 
@@ -52,7 +52,7 @@ router.get('/balance', async (req, res) => {
 
   const customerId = await getCustomerByIdByEmail(email);
   if (!customerId) {
-    return res.status(404).json({ error: 'Customer not found' });
+    return res.status(404).json({ error: 'Customer not found with email: ' + email });
   }
 
   const points = await getCustomerPoints(customerId);
