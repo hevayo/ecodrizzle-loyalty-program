@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
 import type { User, AuthContextType } from '../types'
-import { apiClient } from '../api/apiClient'
 import Cookies from 'js-cookie'
 import { jwtDecode } from "jwt-decode";
 
