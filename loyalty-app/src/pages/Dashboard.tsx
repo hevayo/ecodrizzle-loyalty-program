@@ -38,6 +38,21 @@ const PointsBalance = styled.div`
   margin-bottom: ${({ theme }) => theme.spacing.sm};
 `
 
+const LoadingSpinner = styled.div`
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top: 3px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto;
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+`
+
 const PointsLabel = styled.div`
   color: white;
   opacity: 0.9;
@@ -136,26 +151,87 @@ const TransactionAmount = styled.div<{ type: 'earn' | 'spend' }>`
     type === 'earn' ? theme.colors.success : theme.colors.error};
 `
 
-const Dashboard: React.FC = () => {
-  const { user, isAuthenticated } = useAuth()
-  const navigate = useNavigate()
-  const [transactions, setTransactions] = useState<Transaction[]>([])
-  const [loading, setLoading] = useState(true)
+// Animated Counter Component
+interface AnimatedCounterProps {
+  value: number
+  duration?: number
+}
+
+const AnimatedCounter: React.FC<AnimatedCounterProps> = ({ value, duration = 2000 }) => {
+  const [displayValue, setDisplayValue] = useState(0)
 
   useEffect(() => {
-    const loadTransactions = async () => {
-      try {
-        const data = await apiClient.getTransactions(1, 5)
-        setTransactions(data)
-      } catch (error) {
-        console.error('Failed to load transactions:', error)
-      } finally {
-        setLoading(false)
+    if (value === 0) return
+
+    let startTime: number
+    const startValue = 0
+    const endValue = value
+
+    const animate = (currentTime: number) => {
+      if (!startTime) startTime = currentTime
+      
+      const progress = Math.min((currentTime - startTime) / duration, 1)
+      const easedProgress = 1 - Math.pow(1 - progress, 3) // Ease-out cubic
+      
+      const currentValue = Math.floor(startValue + (endValue - startValue) * easedProgress)
+      setDisplayValue(currentValue)
+
+      if (progress < 1) {
+        requestAnimationFrame(animate)
       }
     }
 
-    loadTransactions()
-  }, [])
+    requestAnimationFrame(animate)
+  }, [value, duration])
+
+  return <>{displayValue.toLocaleString()}</>
+}
+
+const Dashboard: React.FC = () => {
+  const { user, isAuthenticated, updateUser } = useAuth()
+  const navigate = useNavigate()
+  const [transactions, setTransactions] = useState<Transaction[]>([])
+  const [pointsBalance, setPointsBalance] = useState<number>(0)
+  const [loading, setLoading] = useState(true)
+  const [pointsLoading, setPointsLoading] = useState(true)
+
+  useEffect(() => {
+    const loadDashboardData = async () => {
+      try {
+        // Load transactions and points balance in parallel
+        const [transactionsData, pointsData] = await Promise.allSettled([
+          apiClient.getTransactions(1, 5),
+          apiClient.getPointsBalance()
+        ])
+
+        if (transactionsData.status === 'fulfilled') {
+          setTransactions(transactionsData.value)
+        } else {
+          console.error('Failed to load transactions:', transactionsData.reason)
+        }
+
+        if (pointsData.status === 'fulfilled') {
+          setPointsBalance(pointsData.value)
+          // Also update the user context with the latest points balance
+          if (user) {
+            updateUser({ pointsBalance: pointsData.value })
+          }
+        } else {
+          console.error('Failed to load points balance:', pointsData.reason)
+        }
+      } catch (error) {
+        console.error('Failed to load dashboard data:', error)
+      } finally {
+        setLoading(false)
+        // Add a small delay before showing the counter animation
+        setTimeout(() => setPointsLoading(false), 500)
+      }
+    }
+
+    if (isAuthenticated && user) {
+      loadDashboardData()
+    }
+  }, [isAuthenticated, user])
 
   if (!isAuthenticated || !user) {
     return (
@@ -181,7 +257,13 @@ const Dashboard: React.FC = () => {
       </WelcomeSection>
 
       <PointsCard>
-        <PointsBalance>{user.pointsBalance.toLocaleString()}</PointsBalance>
+        <PointsBalance>
+          {pointsLoading ? (
+            <LoadingSpinner />
+          ) : (
+            <AnimatedCounter value={pointsBalance} />
+          )}
+        </PointsBalance>
         <PointsLabel>Loyalty Points</PointsLabel>
         <TierBadge>{user.tier} Member</TierBadge>
       </PointsCard>
