@@ -39,9 +39,12 @@ router.get('/balance', async (req, res) => {
   }
 
   const jwtPayload: any = jwtToJson(jwtAssertion);
+  console.log('JWT Payload:', jwtPayload);
 
   //const email: string | null = "priyanga8312@gmail.com";
   const email: string = jwtPayload.email;
+
+  console.log('Email from JWT:', email);
 
   if (!email) {
     return res.status(404).json({ error: 'Customer not found' });
