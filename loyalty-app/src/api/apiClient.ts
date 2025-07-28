@@ -108,6 +108,17 @@ export const apiClient = {
   // Social Media
   async getSocialMediaPosts(): Promise<SocialMediaPost[]> {
     const response = await apiRequest('/social-media/posts')
+    // API returns array directly, not wrapped in success structure
+    if (Array.isArray(response)) {
+      return response.map(post => ({
+        postUrl: `https://facebook.com/${post.postId}`, // Generate URL from postId
+        postId: post.postId,
+        message: post.message,
+        score: post.score,
+        img: post.img,
+      }))
+    }
+    // Fallback for wrapped response format
     if (response.success) {
       return response.data
     }

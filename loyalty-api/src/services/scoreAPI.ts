@@ -49,7 +49,9 @@ export interface FacebookPostMetadata {
 export interface PostScore {
     postId: string;
     score: number;
-    details?: any;
+    message?: string;
+    img?: string; // Optional image URL for the post
+    details?: any; // Optional details for the score
 }
 
 export interface ContentData {
@@ -59,6 +61,20 @@ export interface ContentData {
         image_urls: string[];
     };
     topic: string;
+}
+
+export interface ScoreAnalysis {
+    text_score: number;
+    visual_score: number;
+    reasoning: string;
+    detected_elements: string[];
+}
+
+export interface ScoreResponse {
+    relevance_score: number;
+    confidence: number;
+    analysis: ScoreAnalysis;
+    processing_time_ms: number;
 }
 
 // Env passed by choreo
@@ -147,7 +163,7 @@ export const mapFacebookPostToContentData = (post: FacebookPostMetadata): Conten
 }
 
 
-export const getScoreForPosts = async (posts: FacebookPostMetadata[]): Promise<PostScore[]> => {
+export const getScoreForPosts = async (posts: any[]): Promise<PostScore[]> => {
     try {
         const client = getApiClient();
         const results: PostScore[] = [];
@@ -156,17 +172,17 @@ export const getScoreForPosts = async (posts: FacebookPostMetadata[]): Promise<P
         for (const post of posts) {
             try {
                 // Convert Facebook post to ContentData format
-                // @ts-ignore
-                const contentData = mapFacebookPostToContentData(post.metadata);
+                const contentData = mapFacebookPostToContentData(post.metadata as FacebookPostMetadata);
 
                 // Send individual post for scoring
                 const response = await client.post('analyze', contentData);
-
+                const scoreResponse: ScoreResponse = response.data;
                 // Collect response with post ID
                 results.push({
-                    postId: post.id,
-                    score: response.data.score,
-                    details: response.data.details
+                    postId: post.postId,
+                    message: contentData.content.caption,
+                    score: scoreResponse.relevance_score,
+                    img: contentData.content.image_urls[0] || '',
                 });
 
             } catch (postError) {

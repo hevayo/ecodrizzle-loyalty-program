@@ -48,25 +48,11 @@ export interface UserReward {
 }
 
 export interface SocialMediaPost {
-  id: string
-  userId: string
-  platform: 'facebook' | 'twitter' | 'instagram' | 'linkedin'
-  postUrl: string
   postId: string
-  content: string
-  engagement: {
-    likes: number
-    shares: number
-    comments: number
-    views: number
-  }
-  postDate: string
-  status: 'pending' | 'approved' | 'rejected' | 'claimed'
-  pointsEarned: number
-  pointsClaimed: boolean
-  reviewNotes?: string
-  createdAt: string
-  updatedAt: string
+  postUrl: string
+  message: string
+  score: number
+  img: string
 }
 
 export interface SocialMediaAccount {

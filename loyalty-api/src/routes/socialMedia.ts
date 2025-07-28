@@ -88,19 +88,7 @@ router.get('/posts', async (req, res) => {
   //@ts-ignore
   const points = await getScoreForPosts(postMetadata);
 
-  // merge post metadata with points
-  const postsWithPoints = posts.map((post, index) => ({
-    ...post,
-    pointsEarned: points[index]
-  }));
-
-  const response: ApiResponse<SocialMediaPost[]> = {
-    success: true,
-    message: 'Social media posts retrieved successfully',
-    data: mockPosts,
-    timestamp: new Date().toISOString()
-  }
-  res.json(postsWithPoints)
+  res.json(points)
 })
 
 // Claim social media points

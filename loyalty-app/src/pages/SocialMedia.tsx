@@ -131,16 +131,16 @@ const FilterButton = styled.button<{ active: boolean }>`
   padding: ${({ theme }) => theme.spacing.sm} ${({ theme }) => theme.spacing.md};
   border-radius: ${({ theme }) => theme.borderRadius.full};
   border: 1px solid ${({ theme }) => theme.colors.border};
-  background: ${({ active, theme }) => 
+  background: ${({ active, theme }) =>
     active ? theme.colors.primary : theme.colors.surface};
-  color: ${({ active, theme }) => 
+  color: ${({ active, theme }) =>
     active ? 'white' : theme.colors.text.primary};
   font-weight: ${({ theme }) => theme.typography.fontWeight.medium};
   transition: ${({ theme }) => theme.transitions.fast};
 
   &:hover {
-    background: ${({ active, theme }) => 
-      active ? theme.colors.primaryDark : theme.colors.primary};
+    background: ${({ active, theme }) =>
+    active ? theme.colors.primaryDark : theme.colors.primary};
     color: white;
   }
 `
@@ -272,12 +272,9 @@ const SocialMedia: React.FC = () => {
   }, [])
 
   const unclaimedPoints = posts
-    .filter(post => post.status === 'approved' && !post.pointsClaimed)
-    .reduce((sum, post) => sum + post.pointsEarned, 0)
+    .reduce((sum, post) => sum + post.score * 10, 0)
 
-  const filteredPosts = posts.filter(post => 
-    activeFilter === 'all' || post.status === activeFilter
-  )
+  const filteredPosts = posts;
 
   const handleClaimPoints = async () => {
     if (!user || unclaimedPoints === 0) return
@@ -286,15 +283,7 @@ const SocialMedia: React.FC = () => {
     try {
       const result = await apiClient.claimSocialMediaPoints(user.id, user.email)
       updateUser({ pointsBalance: user.pointsBalance + result.pointsEarned })
-      
-      setPosts(prevPosts => 
-        prevPosts.map(post => 
-          post.status === 'approved' && !post.pointsClaimed
-            ? { ...post, pointsClaimed: true }
-            : post
-        )
-      )
-      
+
       setTimeout(() => {
         navigate('/dashboard')
       }, 1500)
@@ -338,7 +327,7 @@ const SocialMedia: React.FC = () => {
       <Header>
         <Title>Social Media Points</Title>
         <Description>
-          Earn points by posting about EcoDrizzle on your social media accounts. 
+          Earn points by posting about EcoDrizzle on your social media accounts.
           Share your experience and get rewarded!
         </Description>
       </Header>
@@ -384,45 +373,24 @@ const SocialMedia: React.FC = () => {
       <PostsGrid>
         {filteredPosts.length > 0 ? (
           filteredPosts.map(post => (
-            <PostCard key={post.id}>
+            <PostCard key={post.postId}>
               <PostHeader>
                 <PostPlatform>
-                  <span>{getPlatformIcon(post.platform)}</span>
-                  {post.platform.charAt(0).toUpperCase() + post.platform.slice(1)}
+                  <span>{getPlatformIcon('facebook')}</span>
+                  <span>Facebook</span>
                 </PostPlatform>
-                <StatusBadge status={post.status}>
-                  {post.status.charAt(0).toUpperCase() + post.status.slice(1)}
+                <StatusBadge status={'approved'}>
+                  Approved
                 </StatusBadge>
               </PostHeader>
 
-              <PostContent>{post.content}</PostContent>
-
-              <EngagementStats>
-                <StatItem>
-                  <StatValue>{post.engagement.likes}</StatValue>
-                  <StatLabel>Likes</StatLabel>
-                </StatItem>
-                <StatItem>
-                  <StatValue>{post.engagement.shares}</StatValue>
-                  <StatLabel>Shares</StatLabel>
-                </StatItem>
-                <StatItem>
-                  <StatValue>{post.engagement.comments}</StatValue>
-                  <StatLabel>Comments</StatLabel>
-                </StatItem>
-                <StatItem>
-                  <StatValue>{post.engagement.views}</StatValue>
-                  <StatLabel>Views</StatLabel>
-                </StatItem>
-              </EngagementStats>
+              <PostContent>{post.message}</PostContent>
 
               <PostFooter>
-                <PostDate>{formatDate(post.postDate)}</PostDate>
-                {post.status === 'approved' && (
-                  <PointsEarned>
-                    +{post.pointsEarned} pts {post.pointsClaimed && '(Claimed)'}
-                  </PointsEarned>
-                )}
+                <PostDate>'29-07-25'</PostDate>
+                <PointsEarned>
+                  {post.score * 10} pts
+                </PointsEarned>
               </PostFooter>
             </PostCard>
           ))
