@@ -119,7 +119,7 @@ const Header: React.FC = () => {
 
   const handleLogin = async () => {
     try {
-      await login('demo@example.com', 'demo123')
+      await login()
     } catch (error) {
       console.error('Login failed:', error)
     }

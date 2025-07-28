@@ -87,9 +87,10 @@ export interface AuthContextType {
   user: User | null
   isAuthenticated: boolean
   isLoading: boolean
-  login: (email: string, password: string) => Promise<void>
+  login: () => Promise<void>
   logout: () => void
   updateUser: (userData: Partial<User>) => void
+  refreshSession?: () => Promise<void>
 }
 
 export interface ApiResponse<T> {

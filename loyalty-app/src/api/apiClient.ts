@@ -27,6 +27,7 @@ const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
     const response = await fetch(`${config.baseUrl}${endpoint}`, {
       ...options,
       headers,
+      credentials: 'include', // Include cookies for Choreo managed auth
       signal: controller.signal,
     })
 
@@ -54,22 +55,8 @@ const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
 }
 
 export const apiClient = {
-  // Auth
-  async login(email: string, password: string) {
-    const response = await apiRequest('/auth/login', {
-      method: 'POST',
-      body: JSON.stringify({ email, password }),
-    })
-
-    if (response.success) {
-      localStorage.setItem('authToken', response.data.token)
-      return {
-        user: response.data.user,
-        token: response.data.token,
-      }
-    }
-    throw new Error(response.message || 'Login failed')
-  },
+  // Note: Login is handled by Choreo managed auth via /auth/login redirect
+  // No need for manual login API call
 
   async getCurrentUser(): Promise<User> {
     const response = await apiRequest('/users/profile')

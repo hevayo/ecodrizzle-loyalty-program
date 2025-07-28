@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 import { useAuth } from '../contexts/AuthContext'
 
@@ -146,7 +145,6 @@ const FeatureItem = styled.li`
 
 const Login: React.FC = () => {
   const { login } = useAuth()
-  const navigate = useNavigate()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -155,11 +153,11 @@ const Login: React.FC = () => {
     setError(null)
 
     try {
-      await login('demo@example.com', 'demo123')
-      navigate('/dashboard')
+      // With Choreo managed auth, login() will redirect to /auth/login
+      // No need to navigate manually as the page will be redirected
+      await login()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed')
-    } finally {
       setIsLoading(false)
     }
   }
@@ -191,9 +189,9 @@ const Login: React.FC = () => {
         )}
 
         <DemoCredentials>
-          <DemoTitle>Demo Credentials</DemoTitle>
-          <DemoText>Email: demo@example.com</DemoText>
-          <DemoText>Password: demo123</DemoText>
+          <DemoTitle>Authentication Info</DemoTitle>
+          <DemoText>This app uses Choreo managed authentication</DemoText>
+          <DemoText>Click login to be redirected to the secure login page</DemoText>
         </DemoCredentials>
       </LoginCard>
     </LoginContainer>

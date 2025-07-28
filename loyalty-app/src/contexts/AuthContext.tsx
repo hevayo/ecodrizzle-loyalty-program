@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
 import type { User, AuthContextType } from '../types'
 import Cookies from 'js-cookie'
-import { jwtDecode } from "jwt-decode";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
@@ -16,27 +15,43 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     const initAuth = async () => {
       try {
-        const token = Cookies.get('userinfo');
-
-        if (token) {
-          const decodedToken: any = jwtDecode(token)
-          if (decodedToken) {
-            // Extract user data from JWT payload
-            const userData: User = {
-              email: decodedToken.email,
-              name: decodedToken.name,
-              pointsBalance: 0,
-              id: decodedToken.email,
-              joinDate: '',
-              preferences: {
-                notifications: true,
-                theme: 'light',
-                language: 'en'
-              },
-              tier: 'Bronze', // Default tier, can be updated later
-              avatar: ''
+        // Check for userinfo cookie first (Choreo managed auth)
+        const userinfoToken = Cookies.get('userinfo')
+        
+        if (userinfoToken) {
+          // Fetch user info from Choreo's managed auth endpoint
+          try {
+            const response = await fetch('/auth/userinfo', {
+              credentials: 'include',
+              headers: {
+                'Accept': 'application/json',
+              }
+            })
+            
+            if (response.ok) {
+              const userInfo = await response.json()
+              const userData: User = {
+                id: userInfo.sub || userInfo.email,
+                email: userInfo.email,
+                name: userInfo.name || userInfo.given_name + ' ' + userInfo.family_name || userInfo.email,
+                avatar: userInfo.picture || '',
+                pointsBalance: 0, // Will be fetched from API
+                tier: 'Bronze', // Default tier
+                joinDate: new Date().toISOString(),
+                preferences: {
+                  notifications: true,
+                  theme: 'light',
+                  language: 'en'
+                }
+              }
+              setUser(userData)
+            } else {
+              // If userinfo endpoint fails, clear the cookie
+              Cookies.remove('userinfo')
             }
-            setUser(userData)
+          } catch (fetchError) {
+            console.error('Failed to fetch user info:', fetchError)
+            Cookies.remove('userinfo')
           }
         }
       } catch (error) {
@@ -51,26 +66,71 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, [])
 
   const login = async () => {
-    setIsLoading(true)
-    try {
-      window.location.href = '/auth/login' // Redirect to login page
-    } catch (error) {
-      console.error('Login failed:', error)
-      throw error
-    } finally {
-      setIsLoading(false)
-    }
+    // Redirect to Choreo managed auth login endpoint
+    window.location.href = '/auth/login'
   }
 
   const logout = () => {
-    Cookies.remove('userinfo')
-    window.location.href = '/auth/logout' // Redirect to logout page
+    // Get session_hint cookie for proper logout
+    const sessionHint = Cookies.get('session_hint')
+    
+    // Clear user state
     setUser(null)
+    
+    // Redirect to Choreo managed auth logout endpoint
+    if (sessionHint) {
+      window.location.href = `/auth/logout?session_hint=${sessionHint}`
+    } else {
+      window.location.href = '/auth/logout'
+    }
   }
 
   const updateUser = (userData: Partial<User>) => {
     if (user) {
       setUser({ ...user, ...userData })
+    }
+  }
+
+  const refreshSession = async () => {
+    try {
+      const response = await fetch('/auth/refresh', {
+        method: 'POST',
+        credentials: 'include',
+      })
+      
+      if (response.ok) {
+        // Session refreshed successfully, re-initialize auth
+        const userinfoToken = Cookies.get('userinfo')
+        if (userinfoToken) {
+          const userInfoResponse = await fetch('/auth/userinfo', {
+            credentials: 'include',
+            headers: {
+              'Accept': 'application/json',
+            }
+          })
+          
+          if (userInfoResponse.ok) {
+            const userInfo = await userInfoResponse.json()
+            const userData: User = {
+              id: userInfo.sub || userInfo.email,
+              email: userInfo.email,
+              name: userInfo.name || userInfo.given_name + ' ' + userInfo.family_name || userInfo.email,
+              avatar: userInfo.picture || '',
+              pointsBalance: user?.pointsBalance || 0,
+              tier: user?.tier || 'Bronze',
+              joinDate: user?.joinDate || new Date().toISOString(),
+              preferences: user?.preferences || {
+                notifications: true,
+                theme: 'light',
+                language: 'en'
+              }
+            }
+            setUser(userData)
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Session refresh failed:', error)
     }
   }
 
@@ -81,6 +141,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     login,
     logout,
     updateUser,
+    refreshSession,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
