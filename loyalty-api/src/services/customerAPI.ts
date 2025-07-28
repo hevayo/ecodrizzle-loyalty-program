@@ -39,8 +39,10 @@ interface PointsTransaction {
 
 
 // Env passed by choreo
-const serviceURL = process.env.CHOREO_LOYALTYCUSTOMERAPI_SERVICEURL;
-const choreoApiKey = process.env.CHOREO_LOYALTYCUSTOMERAPI_APIKEY;
+const serviceURL = process.env.CHOREO_CUSTOMERAPI_SERVICEURL;
+const choreoApiKey = process.env.CHOREO_CUSTOMERAPI_APIKEY;
+
+
 
 // Shared API client
 let apiClient: any = null
