@@ -183,31 +183,6 @@ const PostContent = styled.div`
   color: ${({ theme }) => theme.colors.text.primary};
 `
 
-const EngagementStats = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: ${({ theme }) => theme.spacing.md};
-  margin-bottom: ${({ theme }) => theme.spacing.lg};
-`
-
-const StatItem = styled.div`
-  text-align: center;
-  padding: ${({ theme }) => theme.spacing.sm};
-  background: ${({ theme }) => theme.colors.background};
-  border-radius: ${({ theme }) => theme.borderRadius.md};
-`
-
-const StatValue = styled.div`
-  font-size: ${({ theme }) => theme.typography.fontSize.lg};
-  font-weight: ${({ theme }) => theme.typography.fontWeight.semibold};
-  color: ${({ theme }) => theme.colors.primary};
-`
-
-const StatLabel = styled.div`
-  font-size: ${({ theme }) => theme.typography.fontSize.sm};
-  color: ${({ theme }) => theme.colors.text.secondary};
-`
-
 const PostFooter = styled.div`
   display: flex;
   justify-content: space-between;
@@ -292,14 +267,6 @@ const SocialMedia: React.FC = () => {
     } finally {
       setClaiming(false)
     }
-  }
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    })
   }
 
   const getPlatformIcon = (platform: string) => {
