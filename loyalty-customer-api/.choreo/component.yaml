@@ -9,27 +9,22 @@ endpoints:
       basePath: /api/v2
       port: 8080
     networkVisibilities:
-      - Public
       - Organization
     schemaFilePath: openapi.yaml
-
 configurations:
   env:
-    - name: ENTERPRISE_CUSTOMER_REWARDS_BACKEND
+    - name: CHOREO_LOYALTY_TCP_PROXY_SERVICEURL
       valueFrom:
         configForm:
-          displayName: Enterprise Customer Rewards Backend URL
+          displayName: Loyalty Customer TCP Proxy Service URL
           type: string
-          default: "http://localhost:8080/enterprise-customer-rewards-system/service"
-    - name: ENTERPRISE_CUSTOMER_REWARDS_BACKEND_USER
+    - name: CHOREO_LOYALTY_TCP_PROXY_USERNAME
       valueFrom:
         configForm:
-          displayName: Enterprise Customer Rewards Backend User
+          displayName: Loyalty Customer TCP Proxy Username
           type: string
-          default: "admin"
-    - name: ENTERPRISE_CUSTOMER_REWARDS_BACKEND_PASS
+    - name: CHOREO_LOYALTY_TCP_PROXY_PASSWORD
       valueFrom:
         configForm:
-          displayName: Enterprise Customer Rewards Backend Password
-          type: string
-          default: "admin123"
+          displayName: Loyalty Customer TCP Proxy Password
+          type: secret

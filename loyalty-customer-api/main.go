@@ -17,9 +17,9 @@ type Config struct {
 
 func loadConfig() Config {
 	cfg := Config{
-		Backend:     os.Getenv("ENTERPRISE_CUSTOMER_REWARDS_BACKEND"),
-		BackendUser: os.Getenv("ENTERPRISE_CUSTOMER_REWARDS_BACKEND_USER"),
-		BackendPass: os.Getenv("ENTERPRISE_CUSTOMER_REWARDS_BACKEND_PASS"),
+		Backend:     os.Getenv("CHOREO_LOYALTY_TCP_PROXY_SERVICEURL") + "/enterprise-customer-rewards-system/service",
+		BackendUser: os.Getenv("CHOREO_LOYALTY_TCP_PROXY_USERNAME"),
+		BackendPass: os.Getenv("CHOREO_LOYALTY_TCP_PROXY_PASSWORD"),
 	}
 	if cfg.Backend == "" {
 		cfg.Backend = "http://localhost:8080/enterprise-customer-rewards-system/service"

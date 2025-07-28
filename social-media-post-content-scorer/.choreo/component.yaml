@@ -8,8 +8,8 @@ endpoints:
       basePath: /
       port: 8080
     networkVisibilities:
-      - Public
       - Organization
+      - Project
     schemaFilePath: openapi.yaml
 
 # Runtime configurations
