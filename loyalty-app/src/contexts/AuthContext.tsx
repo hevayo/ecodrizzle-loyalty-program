@@ -18,9 +18,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const initAuth = async () => {
       try {
         const token = Cookies.get('userinfo');
-        console.log('Auth token:', token);
-        if (token) {
 
+        if (token) {
           const decodedToken: any = jwtDecode(token)
           if (decodedToken) {
             // Extract user data from JWT payload
