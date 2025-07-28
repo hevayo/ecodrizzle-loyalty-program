@@ -144,6 +144,7 @@ const Login: React.FC = () => {
         if (response.status === 200) {
           // API is healthy, navigate to dashboard
           navigate('/dashboard')
+          setIsHealthChecking(false);
         } else {
           // API is not healthy, show login button
           setIsHealthChecking(false)
