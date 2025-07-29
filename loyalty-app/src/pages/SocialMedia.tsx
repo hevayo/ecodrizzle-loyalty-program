@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
-import { useAuth } from '../contexts/AuthContext'
 import { apiClient } from '../api/apiClient'
-import type { SocialMediaPost, SocialMediaAccount } from '../types'
 
 const SocialMediaContainer = styled.div`
   padding: ${({ theme }) => theme.spacing.lg} 0;
@@ -22,41 +19,6 @@ const Description = styled.p`
   color: ${({ theme }) => theme.colors.text.secondary};
   font-size: ${({ theme }) => theme.typography.fontSize.lg};
   margin-bottom: ${({ theme }) => theme.spacing.lg};
-`
-
-const AccountSection = styled.div`
-  background: ${({ theme }) => theme.colors.surface};
-  border: 1px solid ${({ theme }) => theme.colors.border};
-  border-radius: ${({ theme }) => theme.borderRadius.lg};
-  padding: ${({ theme }) => theme.spacing.xl};
-  margin-bottom: ${({ theme }) => theme.spacing.xl};
-`
-
-const AccountHeader = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing.md};
-  margin-bottom: ${({ theme }) => theme.spacing.lg};
-`
-
-const AccountAvatar = styled.img`
-  width: 3rem;
-  height: 3rem;
-  border-radius: ${({ theme }) => theme.borderRadius.full};
-  object-fit: cover;
-`
-
-const AccountInfo = styled.div`
-  flex: 1;
-`
-
-const AccountName = styled.h3`
-  margin-bottom: ${({ theme }) => theme.spacing.xs};
-`
-
-const AccountHandle = styled.div`
-  color: ${({ theme }) => theme.colors.text.secondary};
-  font-size: ${({ theme }) => theme.typography.fontSize.sm};
 `
 
 const StatusBadge = styled.span<{ status: string }>`
@@ -82,67 +44,6 @@ const StatusBadge = styled.span<{ status: string }>`
       default: return theme.colors.text.secondary
     }
   }};
-`
-
-const ClaimSection = styled.div`
-  background: ${({ theme }) => theme.colors.gradient.primary};
-  border-radius: ${({ theme }) => theme.borderRadius.lg};
-  padding: ${({ theme }) => theme.spacing.xl};
-  text-align: center;
-  margin-bottom: ${({ theme }) => theme.spacing.xl};
-`
-
-const ClaimTitle = styled.h2`
-  color: white;
-  margin-bottom: ${({ theme }) => theme.spacing.md};
-`
-
-const ClaimPoints = styled.div`
-  color: white;
-  font-size: ${({ theme }) => theme.typography.fontSize['2xl']};
-  font-weight: ${({ theme }) => theme.typography.fontWeight.bold};
-  margin-bottom: ${({ theme }) => theme.spacing.lg};
-`
-
-const ClaimButton = styled.button<{ disabled: boolean }>`
-  background: ${({ disabled }) => disabled ? 'rgba(255,255,255,0.3)' : 'white'};
-  color: ${({ disabled, theme }) => disabled ? 'rgba(255,255,255,0.7)' : theme.colors.primary};
-  padding: ${({ theme }) => theme.spacing.md} ${({ theme }) => theme.spacing.xl};
-  border-radius: ${({ theme }) => theme.borderRadius.md};
-  font-weight: ${({ theme }) => theme.typography.fontWeight.semibold};
-  font-size: ${({ theme }) => theme.typography.fontSize.lg};
-  transition: ${({ theme }) => theme.transitions.fast};
-  cursor: ${({ disabled }) => disabled ? 'not-allowed' : 'pointer'};
-
-  &:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: ${({ theme }) => theme.shadows.lg};
-  }
-`
-
-const FilterSection = styled.div`
-  display: flex;
-  gap: ${({ theme }) => theme.spacing.md};
-  margin-bottom: ${({ theme }) => theme.spacing.xl};
-  flex-wrap: wrap;
-`
-
-const FilterButton = styled.button<{ active: boolean }>`
-  padding: ${({ theme }) => theme.spacing.sm} ${({ theme }) => theme.spacing.md};
-  border-radius: ${({ theme }) => theme.borderRadius.full};
-  border: 1px solid ${({ theme }) => theme.colors.border};
-  background: ${({ active, theme }) =>
-    active ? theme.colors.primary : theme.colors.surface};
-  color: ${({ active, theme }) =>
-    active ? 'white' : theme.colors.text.primary};
-  font-weight: ${({ theme }) => theme.typography.fontWeight.medium};
-  transition: ${({ theme }) => theme.transitions.fast};
-
-  &:hover {
-    background: ${({ active, theme }) =>
-    active ? theme.colors.primaryDark : theme.colors.primary};
-    color: white;
-  }
 `
 
 const PostsGrid = styled.div`
@@ -189,14 +90,6 @@ const PostFooter = styled.div`
   align-items: center;
 `
 
-const PostImage = styled.img`
-  width: 100%;
-  max-height: 300px;
-  object-fit: cover;
-  border-radius: ${({ theme }) => theme.borderRadius.md};
-  margin-top: ${({ theme }) => theme.spacing.md};
-`
-
 const PostDate = styled.div`
   font-size: ${({ theme }) => theme.typography.fontSize.sm};
   color: ${({ theme }) => theme.colors.text.secondary};
@@ -218,25 +111,14 @@ const EmptyState = styled.div`
   color: ${({ theme }) => theme.colors.text.secondary};
 `
 
-const statusFilters = [
-  { id: 'all', label: 'All Posts' },
-  { id: 'pending', label: 'Pending Review' },
-  { id: 'approved', label: 'Approved' },
-  { id: 'claimed', label: 'Claimed' },
-  { id: 'rejected', label: 'Rejected' },
-]
-
 const SocialMedia: React.FC = () => {
-  const [posts, setPosts] = useState<SocialMediaPost[]>([])
+  const [posts, setPosts] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const [activeFilter, setActiveFilter] = useState('all')
 
   useEffect(() => {
     const loadSocialMediaData = async () => {
       try {
-        const [postsData] = await Promise.all([
-          apiClient.getSocialMediaPosts(),
-        ])
+        const postsData = await apiClient.getSocialMediaPosts()
         setPosts(postsData)
       } catch (error) {
         console.error('Failed to load social media data:', error)
@@ -278,53 +160,28 @@ const SocialMedia: React.FC = () => {
         </Description>
       </Header>
 
-      {/* {unclaimedPoints > 0 && (
-        <ClaimSection>
-          <ClaimTitle>Ready to Claim Points!</ClaimTitle>
-          <ClaimPoints>{unclaimedPoints} Points Available</ClaimPoints>
-          <ClaimButton
-            disabled={claiming}
-            onClick={handleClaimPoints}
-          >
-            {claiming ? 'Claiming Points...' : 'Claim All Points'}
-          </ClaimButton>
-        </ClaimSection>
-      )} */}
-
-      <FilterSection>
-        {statusFilters.map(filter => (
-          <FilterButton
-            key={filter.id}
-            active={activeFilter === filter.id}
-            onClick={() => setActiveFilter(filter.id)}
-          >
-            {filter.label}
-          </FilterButton>
-        ))}
-      </FilterSection>
-
       <PostsGrid>
         {posts.length > 0 ? (
           posts.map(post => (
-            <PostCard key={post.postId}>
+            <PostCard key={post.id}>
               <PostHeader>
                 <PostPlatform>
                   <span>{getPlatformIcon('facebook')}</span>
                   <span>Facebook</span>
                 </PostPlatform>
-                <StatusBadge status={'approved'}>
-                  Approved
+                <StatusBadge status={post.status}>
+                  {post.status.charAt(0).toUpperCase() + post.status.slice(1)}
                 </StatusBadge>
               </PostHeader>
 
-              <PostContent>{post.message}
-                <PostImage src={post.img} alt={post.message} />
+              <PostContent>
+                {post.content}
               </PostContent>
 
               <PostFooter>
-                <PostDate>'29-07-25'</PostDate>
+                <PostDate>{new Date(post.postDate).toLocaleDateString()}</PostDate>
                 <PointsEarned>
-                  {post.score * 10} pts
+                  {post.pointsEarned} pts
                 </PointsEarned>
               </PostFooter>
             </PostCard>
