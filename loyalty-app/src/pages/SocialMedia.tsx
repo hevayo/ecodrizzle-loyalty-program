@@ -189,6 +189,14 @@ const PostFooter = styled.div`
   align-items: center;
 `
 
+const PostImage = styled.img`
+  width: 100%;
+  max-height: 300px;
+  object-fit: cover;
+  border-radius: ${({ theme }) => theme.borderRadius.md};
+  margin-top: ${({ theme }) => theme.spacing.md};
+`
+
 const PostDate = styled.div`
   font-size: ${({ theme }) => theme.typography.fontSize.sm};
   color: ${({ theme }) => theme.colors.text.secondary};
@@ -219,23 +227,17 @@ const statusFilters = [
 ]
 
 const SocialMedia: React.FC = () => {
-  const { user, updateUser } = useAuth()
-  const navigate = useNavigate()
   const [posts, setPosts] = useState<SocialMediaPost[]>([])
-  const [accounts, setAccounts] = useState<SocialMediaAccount[]>([])
   const [loading, setLoading] = useState(true)
-  const [claiming, setClaiming] = useState(false)
   const [activeFilter, setActiveFilter] = useState('all')
 
   useEffect(() => {
     const loadSocialMediaData = async () => {
       try {
-        const [postsData, accountsData] = await Promise.all([
+        const [postsData] = await Promise.all([
           apiClient.getSocialMediaPosts(),
-          apiClient.getSocialMediaAccounts(),
         ])
         setPosts(postsData)
-        setAccounts(accountsData)
       } catch (error) {
         console.error('Failed to load social media data:', error)
       } finally {
@@ -245,29 +247,6 @@ const SocialMedia: React.FC = () => {
 
     loadSocialMediaData()
   }, [])
-
-  const unclaimedPoints = posts
-    .reduce((sum, post) => sum + post.score * 10, 0)
-
-  const filteredPosts = posts;
-
-  const handleClaimPoints = async () => {
-    if (!user || unclaimedPoints === 0) return
-
-    setClaiming(true)
-    try {
-      const result = await apiClient.claimSocialMediaPoints(user.id, user.email)
-      updateUser({ pointsBalance: user.pointsBalance + result.pointsEarned })
-
-      setTimeout(() => {
-        navigate('/dashboard')
-      }, 1500)
-    } catch (error) {
-      console.error('Failed to claim points:', error)
-    } finally {
-      setClaiming(false)
-    }
-  }
 
   const getPlatformIcon = (platform: string) => {
     switch (platform) {
@@ -299,20 +278,7 @@ const SocialMedia: React.FC = () => {
         </Description>
       </Header>
 
-      {accounts.map(account => (
-        <AccountSection key={account.id}>
-          <AccountHeader>
-            <AccountAvatar src={account.profileImageUrl} alt={account.displayName} />
-            <AccountInfo>
-              <AccountName>{account.displayName}</AccountName>
-              <AccountHandle>{account.handle} • {account.platform}</AccountHandle>
-            </AccountInfo>
-            <StatusBadge status="connected">Connected</StatusBadge>
-          </AccountHeader>
-        </AccountSection>
-      ))}
-
-      {unclaimedPoints > 0 && (
+      {/* {unclaimedPoints > 0 && (
         <ClaimSection>
           <ClaimTitle>Ready to Claim Points!</ClaimTitle>
           <ClaimPoints>{unclaimedPoints} Points Available</ClaimPoints>
@@ -323,7 +289,7 @@ const SocialMedia: React.FC = () => {
             {claiming ? 'Claiming Points...' : 'Claim All Points'}
           </ClaimButton>
         </ClaimSection>
-      )}
+      )} */}
 
       <FilterSection>
         {statusFilters.map(filter => (
@@ -338,8 +304,8 @@ const SocialMedia: React.FC = () => {
       </FilterSection>
 
       <PostsGrid>
-        {filteredPosts.length > 0 ? (
-          filteredPosts.map(post => (
+        {posts.length > 0 ? (
+          posts.map(post => (
             <PostCard key={post.postId}>
               <PostHeader>
                 <PostPlatform>
@@ -351,7 +317,9 @@ const SocialMedia: React.FC = () => {
                 </StatusBadge>
               </PostHeader>
 
-              <PostContent>{post.message}</PostContent>
+              <PostContent>{post.message}
+                <PostImage src={post.img} alt={post.message} />
+              </PostContent>
 
               <PostFooter>
                 <PostDate>'29-07-25'</PostDate>
