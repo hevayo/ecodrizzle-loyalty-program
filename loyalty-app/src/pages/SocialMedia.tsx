@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import styled from 'styled-components'
 import { apiClient } from '../api/apiClient'
+import type { SocialMediaPost } from '../types'
 
 const SocialMediaContainer = styled.div`
   padding: ${({ theme }) => theme.spacing.lg} 0;
@@ -90,11 +91,6 @@ const PostFooter = styled.div`
   align-items: center;
 `
 
-const PostDate = styled.div`
-  font-size: ${({ theme }) => theme.typography.fontSize.sm};
-  color: ${({ theme }) => theme.colors.text.secondary};
-`
-
 const PointsEarned = styled.div`
   font-weight: ${({ theme }) => theme.typography.fontWeight.semibold};
   color: ${({ theme }) => theme.colors.success};
@@ -118,7 +114,7 @@ const SocialMedia: React.FC = () => {
   useEffect(() => {
     const loadSocialMediaData = async () => {
       try {
-        const postsData = await apiClient.getSocialMediaPosts()
+        const postsData: SocialMediaPost[] = await apiClient.getSocialMediaPosts()
         setPosts(postsData)
       } catch (error) {
         console.error('Failed to load social media data:', error)
@@ -162,26 +158,26 @@ const SocialMedia: React.FC = () => {
 
       <PostsGrid>
         {posts.length > 0 ? (
-          posts.map(post => (
-            <PostCard key={post.id}>
+          posts.map((post: SocialMediaPost) => (
+            <PostCard key={post.postId}>
               <PostHeader>
                 <PostPlatform>
                   <span>{getPlatformIcon('facebook')}</span>
                   <span>Facebook</span>
                 </PostPlatform>
-                <StatusBadge status={post.status}>
-                  {post.status.charAt(0).toUpperCase() + post.status.slice(1)}
+                <StatusBadge status={'approved'}>
+                  <span>Approved</span>
                 </StatusBadge>
               </PostHeader>
 
               <PostContent>
-                {post.content}
+                {post.img && <img src={post.img} alt="Post" style={{ maxWidth: '100%', borderRadius: '8px', marginBottom: '10px' }} />}
+                {post.message}
               </PostContent>
 
               <PostFooter>
-                <PostDate>{new Date(post.postDate).toLocaleDateString()}</PostDate>
                 <PointsEarned>
-                  {post.pointsEarned} pts
+                  {post.score * 10} pts
                 </PointsEarned>
               </PostFooter>
             </PostCard>
