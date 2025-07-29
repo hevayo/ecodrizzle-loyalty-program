@@ -85,6 +85,20 @@ const PostContent = styled.div`
   color: ${({ theme }) => theme.colors.text.primary};
 `
 
+const PostImage = styled.img`
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  border-radius: ${({ theme }) => theme.borderRadius.md};
+  margin-bottom: ${({ theme }) => theme.spacing.md};
+  display: block;
+  object-fit: cover;
+  
+  @media (max-width: 768px) {
+    border-radius: ${({ theme }) => theme.borderRadius.sm};
+  }
+`
+
 const PostFooter = styled.div`
   display: flex;
   justify-content: space-between;
@@ -94,6 +108,27 @@ const PostFooter = styled.div`
 const PointsEarned = styled.div`
   font-weight: ${({ theme }) => theme.typography.fontWeight.semibold};
   color: ${({ theme }) => theme.colors.success};
+`
+
+const ClaimButton = styled.button`
+  background: ${({ theme }) => theme.colors.primary};
+  color: white;
+  border: none;
+  border-radius: ${({ theme }) => theme.borderRadius.md};
+  padding: ${({ theme }) => theme.spacing.xs} ${({ theme }) => theme.spacing.sm};
+  font-size: ${({ theme }) => theme.typography.fontSize.sm};
+  font-weight: ${({ theme }) => theme.typography.fontWeight.medium};
+  cursor: pointer;
+  transition: ${({ theme }) => theme.transitions.fast};
+
+  &:hover {
+    background: ${({ theme }) => theme.colors.primaryDark};
+  }
+
+  &:disabled {
+    background: ${({ theme }) => theme.colors.border};
+    cursor: not-allowed;
+  }
 `
 
 const LoadingContainer = styled.div`
@@ -125,6 +160,11 @@ const SocialMedia: React.FC = () => {
 
     loadSocialMediaData()
   }, [])
+
+  const handleClaimPoints = (postId: string) => {
+    // TODO: Implement claim points functionality
+    console.log('Claiming points for post:', postId)
+  }
 
   const getPlatformIcon = (platform: string) => {
     switch (platform) {
@@ -171,7 +211,7 @@ const SocialMedia: React.FC = () => {
               </PostHeader>
 
               <PostContent>
-                {post.img && <img src={post.img} alt="Post" style={{ maxWidth: '100%', borderRadius: '8px', marginBottom: '10px' }} />}
+                {post.img && <PostImage src={post.img} alt="Post content" />}
                 {post.message}
               </PostContent>
 
@@ -179,6 +219,9 @@ const SocialMedia: React.FC = () => {
                 <PointsEarned>
                   {post.score * 10} pts
                 </PointsEarned>
+                <ClaimButton onClick={() => handleClaimPoints(post.postId)}>
+                  Claim
+                </ClaimButton>
               </PostFooter>
             </PostCard>
           ))
